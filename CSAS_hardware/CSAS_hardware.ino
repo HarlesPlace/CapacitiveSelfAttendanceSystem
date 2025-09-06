@@ -8,6 +8,13 @@
 
 #define refresh 2 * 1000000 / mains
 
+// parâmetros da média móvel
+const int windowSize = 10;        // tamanho da janela da média (10 leituras)
+long buffer[10];                  // buffer circular
+int bufferIndex = 0;              
+long soma = 0;                    
+bool bufferCheio = false;
+
 void setup() {
   Serial.begin(115200);
 
@@ -23,9 +30,29 @@ void setup() {
   startTimer();
 }
 
-void loop() {  
-  Serial.println(time(10, B00000100), DEC);
-} 
+void loop() {
+  long leitura = time(10, B00000100);
+
+  // atualiza soma e buffer (média móvel)
+  soma -= buffer[bufferIndex];   // remove o valor antigo
+  buffer[bufferIndex] = leitura; // coloca a nova leitura
+  soma += leitura;               
+
+  bufferIndex++;
+  if (bufferIndex >= windowSize) {
+    bufferIndex = 0;
+    bufferCheio = true;
+  }
+
+  long media;
+  if (bufferCheio) {
+    media = soma / windowSize;
+  } else {
+    media = soma / bufferIndex; // até encher, divide pelo que já tem
+  }
+
+  Serial.println(media);
+}
 
 long time(int pin, byte mask) {
   unsigned long count = 0, total = 0;

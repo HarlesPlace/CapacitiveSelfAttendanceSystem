@@ -15,7 +15,7 @@ boolean[] itensSelecionados = new boolean[3]; // 3 itens de exemplo
 void setup() {
   size(600, 400);
   println(Serial.list()); 
-  myPort = new Serial(this, Serial.list()[0], 115200); // pode precisar trocar o [0]
+  myPort = new Serial(this, Serial.list()[2], 115200); // pode precisar trocar o [0]
 }
 
 // ---------------- Draw (executa em loop) ----------------
@@ -41,6 +41,9 @@ void lerSensor() {
     val = myPort.readStringUntil('\n');
     if (val != null) {
       int sensorValue = int(trim(val));
+      // mapeia o valor do sensor para um índice da lista
+      itemHover = int(map(sensorValue, 5200, 5500, 0, itens.length-1));
+      itemHover = constrain(itemHover, 0, itens.length-1); // garante limites
     }
   }
 }
